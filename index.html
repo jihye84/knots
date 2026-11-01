@@ -150,6 +150,35 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 #infoBtn2{height:40px;border-radius:14px;background:var(--bg);border:1px solid var(--line);font-weight:700;font-size:14px;padding:0 14px;flex:1}
 #app.wide #panel{gap:12px}
 
+/* 인트로 */
+.brand{border-radius:12px;padding:2px 6px 2px 2px}
+.brand:hover{background:var(--bg)}
+#intro{position:fixed;inset:0;z-index:15;background:var(--bg);display:flex;flex-direction:column;gap:clamp(8px,1.6vh,18px);
+  padding:clamp(10px,2vh,24px) clamp(12px,2.4vw,36px) calc(clamp(10px,2vh,24px) + env(safe-area-inset-bottom));overflow:hidden;transition:opacity .25s}
+#intro.hide{opacity:0;pointer-events:none}
+.ihead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px 24px;flex-wrap:wrap}
+.ititle{display:flex;align-items:center;gap:12px;min-width:0}
+.logo.big{width:clamp(38px,6vh,56px);height:clamp(38px,6vh,56px);font-size:clamp(20px,3vh,30px);border-radius:14px;flex:none;background:var(--rainbow);display:grid;place-items:center;color:#fff}
+.ititle h1{font-size:clamp(22px,4vh,40px);font-weight:800;line-height:1.15}
+.ititle p{font-size:clamp(12px,1.8vh,16px);color:var(--sub);line-height:1.4}
+.ilegend{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:clamp(11px,1.6vh,14px)}
+.catChip{padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);font-weight:700;white-space:nowrap}
+.grad{display:flex;align-items:center;gap:6px;color:var(--sub);white-space:nowrap}
+.grad i{width:46px;height:9px;border-radius:5px;background:var(--rainbow);border:1px solid rgba(0,0,0,.3)}
+#cards{flex:1;min-height:0;display:grid;gap:clamp(8px,1.4vh,16px)}
+.kcard{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;border-radius:16px;background:var(--card);border:1px solid var(--line);
+  overflow:hidden;text-align:left;box-shadow:0 1px 0 rgba(0,0,0,.03);transition:transform .15s, box-shadow .15s}
+.kcard:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(60,40,20,.12)}
+.kcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.kcard canvas{flex:1;min-height:0;width:100%;display:block}
+.kcard .kt{padding:4px 12px 8px 14px;display:flex;flex-direction:column;gap:1px}
+.kcard b{font-size:clamp(14px,2.1vh,19px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kcard small{color:var(--sub);font-size:clamp(11px,1.5vh,14px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compact .kcard small,.compact .kcard .cat{display:none}
+.compact .kcard .kt{padding:0 8px 6px 12px}
+@media (max-width:560px){ .ititle p{display:none} .grad{display:none} }
+.kcard .cat{position:absolute;left:12px;top:8px;font-size:clamp(10px,1.4vh,12px);font-weight:700;color:var(--c)}
+
 /* 정보 창 */
 #scrim{position:fixed;inset:0;background:rgba(30,25,20,.35);z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
 #scrim.on{opacity:1;pointer-events:auto}
@@ -168,7 +197,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 <body>
 <div id="app" class="narrow">
   <header id="top">
-    <div class="brand"><span class="logo">∞</span><span>매듭 교실</span></div>
+    <button class="brand" id="homeBtn" aria-label="처음 화면(매듭 모아 보기)"><span class="logo">∞</span><span>매듭 교실</span></button>
     <button id="pickBtn" class="pickBtn" aria-label="매듭 고르기"><span id="pickCat" class="catDot"></span><span id="pickName"></span><span>▾</span></button>
     <button id="infoBtn" class="iconBtn" aria-label="이 매듭 정보">i</button>
   </header>
@@ -193,6 +222,13 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
       <button id="bPlay">▶▶ 이어보기</button>
     </div>
     <div id="subRow"><button id="speedBtn">속도: 보통</button><button id="infoBtn2">ⓘ 언제 쓰나요?</button></div>
+  </section>
+  <section id="intro" aria-label="매듭 고르기">
+    <header class="ihead">
+      <div class="ititle"><span class="logo big">∞</span><div><h1>매듭 교실</h1><p>생존·탈출·생활에 쓰는 매듭 10가지. 완성 모양을 보고 골라 들어가 한 단계씩 배워요.</p></div></div>
+      <div class="ilegend"><span class="catChip" style="--c:#2f9e44">🏕️ 생존·야외</span><span class="catChip" style="--c:#e03131">🚨 탈출·구조</span><span class="catChip" style="--c:#1971c2">🏠 생활 편의</span><span class="grad"><i></i> 파랑 = 고정 쪽, 빨강 = 끝</span></div>
+    </header>
+    <div id="cards"></div>
   </section>
   <div id="scrim"></div>
   <div id="infoDlg" role="dialog" aria-modal="true">
@@ -442,7 +478,7 @@ function stepTargets(knot,k){
 /* ============================================================
    그리기
    ============================================================ */
-const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const cv = document.getElementById('cv'); let ctx = cv.getContext('2d');
 let view = {s:1, ox:0, oy:0, dpr:1, w:0, h:0};
 const OUT='#2a211b';
 
@@ -611,9 +647,9 @@ function render(){
   });
 }
 
-function renderTight(){
+function renderTight(knot=window.__curKnot, U=tightU){
   const T=knot._T, M=T.frames.length;
-  const fpos=Math.min(M-1, Math.max(0, tightU*(M-1)));
+  const fpos=Math.min(M-1, Math.max(0, U*(M-1)));
   const i0=Math.floor(fpos), i1=Math.min(M-1,i0+1), t=fpos-i0;
   const A=T.frames[i0], B=T.frames[i1];
   const items=[];
@@ -770,7 +806,7 @@ function updateUI(k){
 }
 function selectKnot(id, autoplay){
   const k=KNOTS.find(x=>x.id===id)||KNOTS[0];
-  knot=k; prepare(k); setPlay(false); anim=null;
+  knot=k; window.__curKnot=k; prepare(k); setPlay(false); anim=null;
   const c=CATS[k.cat];
   $('pickName').textContent=k.name;
   const pc=$('pickCat'); pc.textContent=c.name; pc.style.background=c.color;
@@ -823,6 +859,7 @@ $('bNext').onclick=next; $('bPrev').onclick=prev; $('bFirst').onclick=first; $('
 const SPEEDS=[[0.55,'🐢 느리게'],[1,'보통'],[1.8,'🐇 빠르게']]; let spI=1;
 $('speedBtn').onclick=()=>{ spI=(spI+1)%3; speed=SPEEDS[spI][0]; $('speedBtn').textContent='속도: '+SPEEDS[spI][1]; };
 addEventListener('keydown',e=>{
+  if(introOn) return;
   if(e.key==='ArrowRight'){next();e.preventDefault();}
   else if(e.key==='ArrowLeft'){prev();e.preventDefault();}
   else if(e.key===' '){togglePlay();e.preventDefault();}
@@ -831,10 +868,74 @@ addEventListener('keydown',e=>{
 addEventListener('resize',layout);
 if(window.ResizeObserver) new ResizeObserver(()=>fit()).observe($('stage'));
 
+/* ============================================================
+   인트로(매듭 모아 보기)
+   ============================================================ */
+const ORDER = Object.keys(CATS).flatMap(c=>KNOTS.filter(k=>k.cat===c).sort((a,b)=>a.lv-b.lv));
+function buildCards(){
+  const box=$('cards'); box.innerHTML='';
+  for(const k of ORDER){
+    const c=CATS[k.cat];
+    const b=document.createElement('button'); b.className='kcard'; b.style.setProperty('--c',c.color);
+    b.innerHTML=`<span class="cat">${c.icon} ${c.name}</span><canvas></canvas><span class="kt"><b>${k.name} <em class="stars">${'★'.repeat(k.lv)}<i>${'★'.repeat(3-k.lv)}</i></em></b><small>${k.short}</small></span>`;
+    b.onclick=()=>enterKnot(k.id);
+    box.appendChild(b);
+  }
+}
+function layoutCards(){
+  const box=$('cards'); const W=box.clientWidth, H=box.clientHeight, n=ORDER.length, gap=parseFloat(getComputedStyle(box).rowGap)||10;
+  let best=null;
+  for(let cols=1;cols<=n;cols++){
+    const rows=Math.ceil(n/cols); const cw=(W-gap*(cols-1))/cols, ch=(H-gap*(rows-1))/rows;
+    if(cw<=0||ch<=0) continue;
+    const thumbH=ch-50; let score=Math.min(cw, thumbH*1.25); if(cw<150 && W>=320) score*=0.5;
+    if(!best||score>best.score) best={cols,rows,score};
+  }
+  if(!best) return;
+  box.style.gridTemplateColumns=`repeat(${best.cols},minmax(0,1fr))`;
+  box.style.gridTemplateRows=`repeat(${best.rows},minmax(0,1fr))`;
+  const ch=(H-gap*(best.rows-1))/best.rows; box.classList.toggle('compact', ch<150);
+  requestAnimationFrame(drawThumbs);
+}
+function drawThumbs(){
+  const cards=[...document.querySelectorAll('.kcard canvas')];
+  const keep=ctx;
+  ORDER.forEach((k,i)=>{
+    const c=cards[i]; if(!c) return;
+    prepare(k);
+    const r=c.getBoundingClientRect(); if(r.width<2||r.height<2) return;
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    c.width=Math.round(r.width*dpr); c.height=Math.round(r.height*dpr);
+    ctx=c.getContext('2d');
+    const [x0,y0,x1,y1]=k._tbox||k._box; const cmp=$('cards').classList.contains('compact'); const pad=cmp?4:10, top=cmp?4:22;
+    const s=Math.min((r.width-pad*2)/(x1-x0),(r.height-top-pad)/(y1-y0));
+    const ox=(r.width-(x1-x0)*s)/2-x0*s, oy=top+(r.height-top-pad-(y1-y0)*s)/2-y0*s;
+    ctx.setTransform(dpr*s,0,0,dpr*s,dpr*ox,dpr*oy);
+    ctx.save(); ctx.beginPath(); ctx.rect(x0-200,y0-200,x1-x0+400,y1-y0+400); ctx.clip();
+    if(k._T) renderTight(k,1);
+    ctx.restore();
+  });
+  ctx=keep;
+}
+let introOn=false;
+function showIntro(){
+  introOn=true; setPlay(false); anim=null; $('intro').classList.remove('hide');
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+  layoutCards();
+}
+function enterKnot(id){
+  introOn=false; $('intro').classList.add('hide');
+  layout(); selectKnot(id,true);
+}
+$('homeBtn').onclick=showIntro;
+addEventListener('resize',()=>{ if(introOn) layoutCards(); });
+
 buildList();
+buildCards();
 layout();
 const start=(location.hash||'').slice(1);
-selectKnot(KNOTS.some(k=>k.id===start)?start:'overhand', true);
+if(KNOTS.some(k=>k.id===start)){ $('intro').classList.add('hide'); selectKnot(start,true); }
+else { selectKnot('overhand',false); showIntro(); }
 requestAnimationFrame(tick);
 
 // 확인용
